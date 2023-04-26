@@ -1,55 +1,40 @@
-# Backend oriented task (Java/Python/JS/.NET)
+## Exchange rate application
+The goal of the project is to query data from the [Narodowy Bank Polski's public APIs](http://api.nbp.pl/
+) and return relevant information.
+There are three type of functions:
+1. Given a date (formatted YYYY-MM-DD) and a [currency code](https://nbp.pl/en/statistic-and-financial-reporting/rates/table-a/), provides its average exchange rate.
+2. Given a currency code and the number of last quotations N (1 <= N <= 255), provides the max and min average value.
+3. Given a currency code and the number of last quotations N (1 <= N <= 255), provides the major difference between the buy and ask rate.
 
-## Description
+### Installation
+Clone the repository with `git clone https://github.com/Riklia/gdn-internship-2023.git`
+Navigate to the project directory.
+Install dependencies with `pip install -r requirements.txt`
 
-Create a project, a simple runnable local server, that exposes some endpoints which take arguments and return plain simple data after performing certain internal operations.
-The goal is to query data from the Narodowy Bank Polski's public APIs and return relevant information from them. User manual: http://api.nbp.pl/
+### Usage
+To start the server, run `python app.py`. The server will be available at http://localhost:5000.
 
-## Considerations
+### Endpoints
+* /exchanges/{code}/{date}
+Returns the average exchange rate for a given currency code and date.
 
-- Table A only will be used for average exchange rates and table C for buy and sell rates. Reference: https://nbp.pl/en/statistic-and-financial-reporting/rates/
-- Operations and examples can be found in the manual.
-- Weekend dates or holidays, for example, do not return data.
+{code}: a 3-letter currency code (e.g., USD, EUR, AUD)
+{date}: the date for which to retrieve the exchange rate in format YYYY-MM-DD
+Example: `curl http://localhost:5000/exchanges/aud/2023-04-24` should have 2.8024 value in the response.
 
-## Required operations
+* /minmax/{code}/{N}
+Returns the minimum and maximum exchange rates for a given currency code over the last N days.
 
-Provide a separate endpoint for each operation:
-1. Given a date (formatted YYYY-MM-DD) and a currency code (list: https://nbp.pl/en/statistic-and-financial-reporting/rates/table-a/), provide its average exchange rate.
-2. Given a currency code and the number of last quotations N (N <= 255), provide the max and min average value (every day has a different average).
-3. Given a currency code and the number of last quotations N (N <= 255), provide the major difference between the buy and ask rate (every day has different rates).
+{code}: A 3-letter currency code (e.g., USD, EUR, AUD)
+{N}: The number of days to retrieve exchange rates for (must be between 1 and 255)
+Example: `curl http://localhost:5000/minmax/USD/10` should return min and max exchange rates for USD over the last 10 days
 
-## Optional
+* /difference/{code}/{int:N}
+Returns the maximum difference between the ask and bid prices for a given currency code over the last N days.
 
-The following features are not mandatory, but considered as a plus:
-- Unit/integration tests.
-- Docker image of the whole application.
-- Swagger UI or any other simple front-end (with e.g. React, Angular).
+{code}: A 3-letter currency code (e.g., USD, EUR, AUD)
+{N}: The number of days to retrieve exchange rates for (must be between 1 and 255)
+Example: `curl http://localhost:5000/difference/EUR/30` which should return max difference between the ask and bid prices for EUR over the last 30 days.
 
-
-## Guidelines
-
-- It shouldn't take more than 1 day.
-- Decide on how to decompose application layers.
-- Pay attention to overall coding style and errors handling.
-- Output format is not specified.
-- No authentication nor security needed.
-- Add readme with relevant information about how to run it and examples.
-
-RESTful web API design reference: https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-design
-
-## Criteria
-
-Provide succinct and direct instructions in the main readme to start the server and test the operations.
-
-### Example
-
-- To start the server, run this command:
-```
-python -m http.server
-```
-- To query operation 1, run this command (which should have the value 5.2768 as the returning information):
-```
-curl http://localhost:8888/exchanges/GBP/2023-01-02
-```
-
-Attention will be put on correct behaviour of operations, application structure, and general code quality (readability, naming, etc.).  
+### Testing
+To run the test suite, run `python test_app.py`. This will run a series of unit tests to ensure the API endpoints are working correctly.
